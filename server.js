@@ -14,23 +14,22 @@ let placeId;
 
 server.get('/places', (req, res, next) => {
 	const { places } = req.query;
-	// if (!place) {
-	// 	res.send({ error: "Input place" });
-	// }
+	if (!places) {
+		res.send({ error: "Input place" });
+		return;
+	}
 	console.log('places ->', places);
 	//https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=-33.8670522,151.1957362&rankby=distance&types=food&key=YOUR_API_KEY
 	fetch(`https://maps.googleapis.com/maps/api/place/textsearch/json?query=${places}&key=${GMAPS_KEY}`)
-		.then(res => {
-			res.json().then(json => {
-				results = json.results[0];
-				console.log('Results', results);
-				placeId = results.place_id;
-				console.log('placeId ->', placeId);
-			})
+		.then(place => place.json())
+		.then(place => {
+			console.log(place);
+			placeId = place.results[0].place_id;
+			res.send(place);
 		})
-		.catch(err => console.log('error:', err));
-
-	res.send(results);
+		.catch(err => {
+			res.send({ error: err });
+		});
 });
 
 let result;
@@ -38,14 +37,14 @@ let result;
 server.get('/place', (req, res) => {
 	console.log('placeId 2nd time ->', placeId);
 	fetch(`https://maps.googleapis.com/maps/api/place/details/json?placeid=${placeId}&key=${GMAPS_KEY}`)
-		.then(res => {
-			res.json().then(json => {
-				result = json;
-				console.log('Result ->', json);
-			})
+		.then(place => place.json())
+		.then(place => {
+			console.log(place)
+			res.send(place);
 		})
-		.catch(err => console.log('error:', err));
-	res.send(result);
+		.catch(err => {
+			res.send({ error: err });
+		});
 });
 
 server.listen(PORT, err => {
