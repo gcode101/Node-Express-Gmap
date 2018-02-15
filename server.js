@@ -30,13 +30,12 @@ server.get('/places', (req, res, next) => {
 		})
 		.catch(err => console.log('error:', err));
 
-	// res.send(results);
-	next();
+	res.send(results);
 });
 
 let result;
 //https://maps.googleapis.com/maps/api/place/details/json?placeid=ChIJN1t_tDeuEmsRUsoyG83frY4&key=YOUR_API_KEY
-server.get('/places', (req, res) => {
+server.get('/place', (req, res) => {
 	console.log('placeId 2nd time ->', placeId);
 	fetch(`https://maps.googleapis.com/maps/api/place/details/json?placeid=${placeId}&key=${GMAPS_KEY}`)
 		.then(res => {
