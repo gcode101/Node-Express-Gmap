@@ -9,25 +9,44 @@ server.use(bodyParser.json());
 const PORT = config.port;
 const GMAPS_KEY = config.gmaps.apiKey;
 
-server.get('/place', (req, res) => {
-	const { place } = req.query;
+let results;
+let placeId;
+
+server.get('/places', (req, res, next) => {
+	const { places } = req.query;
 	// if (!place) {
 	// 	res.send({ error: "Input place" });
 	// }
-	console.log('place ->', place);
-	console.log('GMAPS_KEY', GMAPS_KEY);
-	let fetchBody = '';
-	let fetchText = '';
+	console.log('places ->', places);
 	//https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=-33.8670522,151.1957362&rankby=distance&types=food&key=YOUR_API_KEY
-	fetch(`https://maps.googleapis.com/maps/api/place/textsearch/json?query=restaurants+in+Sydney&key=${GMAPS_KEY}`)
+	fetch(`https://maps.googleapis.com/maps/api/place/textsearch/json?query=${places}&key=${GMAPS_KEY}`)
 		.then(res => {
 			res.json().then(json => {
-				console.log('results', json.results);
+				results = json.results[0];
+				console.log('Results', results);
+				placeId = results.place_id;
+				console.log('placeId ->', placeId);
 			})
 		})
 		.catch(err => console.log('error:', err));
 
-	res.send(fetchText);
+	// res.send(results);
+	next();
+});
+
+let result;
+//https://maps.googleapis.com/maps/api/place/details/json?placeid=ChIJN1t_tDeuEmsRUsoyG83frY4&key=YOUR_API_KEY
+server.get('/places', (req, res) => {
+	console.log('placeId 2nd time ->', placeId);
+	fetch(`https://maps.googleapis.com/maps/api/place/details/json?placeid=${placeId}&key=${GMAPS_KEY}`)
+		.then(res => {
+			res.json().then(json => {
+				result = json;
+				console.log('Result ->', json);
+			})
+		})
+		.catch(err => console.log('error:', err));
+	res.send(result);
 });
 
 server.listen(PORT, err => {
@@ -37,3 +56,12 @@ server.listen(PORT, err => {
 		console.log(`Server listening on port: ${PORT}`);
 	}
 });
+
+
+
+
+
+
+
+
+
